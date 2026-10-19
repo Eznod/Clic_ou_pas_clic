@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clic ou pas clic ?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout : une colonne de lecture (~680px), sections empilées comme un parcours : comprendre → s'entraîner → retenir → agir */
+:root{
+  --bg:#f3f6f7; --surface:#ffffff; --ink:#0f2a33; --muted:#4f6670;
+  --sea:#0e5a6e; --sea-soft:#d9ecef; --buoy:#e8590c; --buoy-soft:#fde6d8;
+  --ok:#1f7a4a; --ok-soft:#dcf1e4; --bad:#b42318; --bad-soft:#fbe1de;
+  --line:#d4e0e3; --bubble:#e7ecee;
+  --display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1a1f; --surface:#132730; --ink:#e6f0f2; --muted:#9db3ba;
+  --sea:#5fc0d4; --sea-soft:#163a45; --buoy:#ff8a4c; --buoy-soft:#3a2418;
+  --ok:#5fd394; --ok-soft:#15352a; --bad:#ff8577; --bad-soft:#3d1c19;
+  --line:#24414b; --bubble:#1d353f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1a1f; --surface:#132730; --ink:#e6f0f2; --muted:#9db3ba;
+  --sea:#5fc0d4; --sea-soft:#163a45; --buoy:#ff8a4c; --buoy-soft:#3a2418;
+  --ok:#5fd394; --ok-soft:#15352a; --bad:#ff8577; --bad-soft:#3d1c19;
+  --line:#24414b; --bubble:#1d353f; color-scheme:dark}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:680px;margin:0 auto;padding-block:32px 48px;display:flex;flex-direction:column;gap:48px}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.4rem,8vw,3.6rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.65rem;font-weight:800;margin-bottom:12px}
+h3{font-size:1.1rem;font-weight:600}
+p{margin:0 0 12px}
+a{color:var(--sea);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--buoy);outline-offset:2px;border-radius:4px}
+.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sea);margin-bottom:8px}
+
+/* En-tête */
+header .hook{display:inline-block;color:var(--buoy)}
+header .lead{font-size:1.2rem;color:var(--muted);margin-top:14px;max-width:34em}
+.slogan{margin-top:20px;display:inline-block;background:var(--buoy);color:#fff;font-family:var(--display);font-weight:600;
+  font-size:1.15rem;padding:8px 14px;border-radius:6px}
+
+/* Chiffres */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px}
+.fact{background:var(--sea-soft);border-radius:8px;padding:14px 16px}
+.fact b{display:block;font-family:var(--display);font-size:1.7rem;color:var(--sea);font-variant-numeric:tabular-nums}
+.fact span{font-size:.95rem;color:var(--ink)}
+.note{font-size:.85rem;color:var(--muted)}
+
+/* Téléphone */
+.phone{background:var(--surface);border:2px solid var(--line);border-radius:28px;padding:18px 16px 22px;max-width:360px;margin:18px auto 0}
+.phone .from{font-size:.85rem;color:var(--muted);text-align:center;margin-bottom:10px}
+.bubble{background:var(--bubble);border-radius:16px 16px 16px 4px;padding:12px 14px;font-size:.98rem;line-height:1.5}
+.flag{all:unset;cursor:pointer;border-bottom:2px dashed var(--buoy);position:relative;padding:0 1px}
+.flag::after{content:attr(data-n);font-family:var(--display);font-size:.7rem;font-weight:800;color:#fff;background:var(--buoy);
+  border-radius:50%;width:18px;height:18px;display:inline-grid;place-items:center;margin-left:3px;vertical-align:2px}
+.flag[aria-pressed="true"]{background:var(--buoy-soft)}
+.flag:focus-visible{outline:3px solid var(--buoy)}
+.clues{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:8px}
+.clues li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.clues li.on{border-color:var(--buoy);color:var(--ink)}
+.clues .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--line);color:var(--ink);display:grid;place-items:center;font-weight:700;font-size:.8rem}
+.clues li.on .n{background:var(--buoy);color:#fff}
+.clues .t{min-width:0}
+.hint{text-align:center;font-size:.9rem;color:var(--muted);margin-top:10px}
+
+/* Quiz */
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin-top:16px}
+.qhead{display:flex;justify-content:space-between;gap:12px;font-size:.9rem;color:var(--muted);margin-bottom:12px;font-variant-numeric:tabular-nums}
+.msg{background:var(--bubble);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.msg .meta{font-size:.82rem;color:var(--muted);margin-bottom:4px;overflow-wrap:anywhere}
+.msg .txt{overflow-wrap:anywhere}
+.choices{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;cursor:pointer;border-radius:8px;padding:10px 18px;border:2px solid var(--sea);background:transparent;color:var(--sea);flex:1 1 140px}
+.btn:hover{background:var(--sea-soft)}
+.btn.primary{background:var(--sea);color:var(--surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.feedback{margin-top:14px;padding:12px 14px;border-radius:8px}
+.feedback.good{background:var(--ok-soft)} .feedback.good strong{color:var(--ok)}
+.feedback.wrong{background:var(--bad-soft)} .feedback.wrong strong{color:var(--bad)}
+.next{margin-top:12px}
+
+/* Conseils */
+.tips{list-style:none;counter-reset:t;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:14px}
+.tips li{counter-increment:t;display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start}
+.tips li::before{content:counter(t);font-family:var(--display);font-weight:800;font-size:1.4rem;color:var(--buoy);
+  border:2px solid var(--buoy);border-radius:50%;width:40px;height:40px;display:grid;place-items:center}
+.tips h3{margin-bottom:4px}
+.tips p{color:var(--muted);margin:0}
+.tips div{min-width:0}
+
+/* Que faire */
+.table-wrap{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:.96rem}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.code{font-family:var(--display);font-weight:800;color:var(--sea);white-space:nowrap}
+.alert{background:var(--bad-soft);border-radius:10px;padding:14px 16px;margin-top:18px}
+.alert ul{margin:6px 0 0;padding-left:20px}
+
+/* Appel à l'action */
+.cta{background:var(--sea);color:var(--surface);border-radius:14px;padding:28px 22px;text-align:center}
+.cta h2{font-size:clamp(1.6rem,6vw,2.2rem);color:var(--surface);margin-bottom:8px}
+.cta p{margin:0;opacity:.9}
+.cta .steps{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px;font-family:var(--display);font-weight:600}
+.cta .steps span{background:rgba(255,255,255,.15);padding:6px 12px;border-radius:999px}
+
+/* Sources */
+.sources ol{padding-left:20px;margin:8px 0 0;font-size:.92rem;color:var(--muted)}
+.sources li{margin-bottom:6px;overflow-wrap:anywhere}
+footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+
+@media (prefers-reduced-motion:no-preference){.feedback{animation:pop .25s ease-out}@keyframes pop{from{transform:translateY(4px)}to{transform:none}}}
+</style>
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Cyber réflexes · Hameçonnage</div>
+  <h1>Clic ou pas&nbsp;clic&nbsp;<span class="hook">?</span></h1>
+  <p class="lead">Un SMS de livraison, un mail de votre banque, une alerte « urgente »… Certains messages sont des pièges pour voler vos codes ou votre argent. Voici comment les repérer en quelques secondes.</p>
+  <div class="slogan">Avant de cliquer, prenez 5 secondes pour vérifier.</div>
+</header>
+
+<section id="risque">
+  <div class="eyebrow">1 · Comprendre</div>
+  <h2>L'hameçonnage, c'est quoi ?</h2>
+  <p>L'<strong>hameçonnage</strong> (en anglais <em>phishing</em>) est une arnaque où un escroc se fait passer pour un organisme de confiance : banque, transporteur de colis, administration, opérateur… Il vous envoie un faux SMS, un faux mail ou vous appelle.</p>
+  <p>Son but : vous pousser à <strong>cliquer sur un lien</strong> qui mène vers un faux site, très ressemblant au vrai. Là, on vous demande vos identifiants, votre mot de passe ou votre numéro de carte bancaire. Une fois ces informations données, l'escroc peut vider votre compte ou pirater vos comptes en ligne.</p>
+  <div class="facts">
+    <div class="fact"><b>N°1</b><span>L'hameçonnage est la première menace pour les particuliers en 2025</span></div>
+    <div class="fact"><b>+500 000</b><span>demandes d'aide reçues par Cybermalveillance.gouv.fr en 2025 (+20 % en un an)</span></div>
+  </div>
+  <p class="note" style="margin-top:8px">Chiffres : rapport d'activité 2025 de Cybermalveillance.gouv.fr (publié en mars 2026).</p>
+</section>
+
+<section id="exemple">
+  <div class="eyebrow">2 · Mise en situation</div>
+  <h2>Vous recevez ce SMS. Vous cliquez ?</h2>
+  <p>Ce message est un exemple fictif, mais construit comme les vrais. Il contient <strong>4 indices</strong> d'arnaque. Touchez les mots soulignés pour les découvrir.</p>
+  <div class="phone" aria-label="Exemple de SMS frauduleux">
+    <div class="from">+33 7 56 •• •• •• · aujourd'hui 08:42</div>
+    <div class="bubble">
+      ColiRapide : votre colis n'a pas pu être livré. <button class="flag" data-n="1" aria-pressed="false">Dernier avis avant retour à l'expéditeur</button>. Réglez les <button class="flag" data-n="2" aria-pressed="false">frais de réexpédition de 1,99 €</button> sur <button class="flag" data-n="3" aria-pressed="false">colirapide-suivi-livraison.info</button> pour <button class="flag" data-n="4" aria-pressed="false">confirmer votre carte bancaire</button>.
+    </div>
+  </div>
+  <p class="hint" id="count">0 indice trouvé sur 4</p>
+  <ul class="clues" id="clues">
+    <li data-n="1"><span class="n">1</span><span class="t"><strong>L'urgence.</strong> « Dernier avis », « sous 24 h »… La pression sert à vous faire agir sans réfléchir.</span></li>
+    <li data-n="2"><span class="n">2</span><span class="t"><strong>Une petite somme.</strong> 1,99 €, ça paraît sans risque. Mais le but est d'obtenir votre numéro de carte, pas les 1,99 €.</span></li>
+    <li data-n="3"><span class="n">3</span><span class="t"><strong>Une adresse bizarre.</strong> Le nom du site est rallongé et finit par une extension inhabituelle. Un vrai transporteur vous renverrait vers son site officiel.</span></li>
+    <li data-n="4"><span class="n">4</span><span class="t"><strong>On demande vos données bancaires.</strong> Aucun organisme sérieux ne vous demande ça par SMS ou par mail.</span></li>
+  </ul>
+</section>
+
+<section id="quiz">
+  <div class="eyebrow">3 · À vous de jouer</div>
+  <h2>Arnaque ou message normal ?</h2>
+  <p>5 messages, à vous de trancher. Tous les noms d'entreprises sont inventés.</p>
+  <div class="quiz" id="quizBox" aria-live="polite"></div>
+</section>
+
+<section id="conseils">
+  <div class="eyebrow">4 · Les bons réflexes</div>
+  <h2>5 conseils à retenir</h2>
+  <ol class="tips">
+    <li><div><h3>Ne donnez jamais vos codes ou votre carte par message</h3><p>Aucune banque, administration ou entreprise sérieuse ne vous demande votre mot de passe ou vos coordonnées bancaires par SMS, mail ou téléphone.</p></div></li>
+    <li><div><h3>Vérifiez l'adresse avant de cliquer</h3><p>Sur ordinateur, passez la souris sur le lien sans cliquer ; sur téléphone, faites un appui long. Regardez l'adresse qui s'affiche : une seule lettre changée suffit à faire un faux site.</p></div></li>
+    <li><div><h3>Passez par le chemin officiel</h3><p>Au lieu de cliquer, ouvrez vous-même l'application ou le site de l'organisme (en tapant l'adresse ou via vos favoris). En cas de doute, appelez-le avec le numéro inscrit sur votre carte ou votre contrat.</p></div></li>
+    <li><div><h3>Méfiez-vous de l'urgence</h3><p>« Dernier délai », « compte bloqué », « amende majorée »… Un message qui vous presse est un signal d'alerte. Prenez le temps de vérifier.</p></div></li>
+    <li><div><h3>Protégez vos comptes en amont</h3><p>Un mot de passe différent pour chaque compte, et la double authentification activée quand c'est possible : même si un code est volé, l'escroc sera bloqué.</p></div></li>
+  </ol>
+</section>
+
+<section id="agir">
+  <div class="eyebrow">5 · Signaler et réagir</div>
+  <h2>Vous avez un doute ? Signalez-le</h2>
+  <p>Signaler est gratuit et aide à faire fermer les faux sites et les faux numéros.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Vous avez reçu…</th><th>Où le signaler</th></tr></thead>
+    <tbody>
+      <tr><td>Un SMS suspect</td><td>Transférez-le au <span class="code">33700</span> (gratuit) ou sur 33700.fr</td></tr>
+      <tr><td>Un mail suspect</td><td><a href="https://www.signal-spam.fr/" target="_blank" rel="noopener">Signal Spam</a></td></tr>
+      <tr><td>Un faux site</td><td><a href="https://phishing-initiative.fr/contrib/" target="_blank" rel="noopener">Phishing Initiative</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="alert">
+    <h3>Vous avez déjà cliqué ou donné des informations ?</h3>
+    <ul>
+      <li>Carte bancaire donnée : <strong>faites opposition</strong> tout de suite auprès de votre banque.</li>
+      <li>Mot de passe donné : <strong>changez-le</strong>, ainsi que partout où vous utilisiez le même.</li>
+      <li>Gardez le message comme <strong>preuve</strong> et faites-vous aider sur <a href="https://17cyber.gouv.fr/" target="_blank" rel="noopener">17cyber.gouv.fr</a> (police et gendarmerie, 24 h/24).</li>
+      <li>Besoin de conseils : Info Escroqueries au <span class="code">0 805 805 817</span> (gratuit, du lundi au vendredi).</li>
+    </ul>
+  </div>
+</section>
+
+<section class="cta" aria-label="Message à retenir">
+  <h2>Dans le doute, je ne clique pas : je vérifie.</h2>
+  <p>Et si c'est une arnaque, je la signale.</p>
+  <div class="steps"><span>Je m'arrête</span><span>Je vérifie</span><span>Je signale</span></div>
+</section>
+
+<section class="sources">
+  <h2>Sources</h2>
+  <ol>
+    <li>Cybermalveillance.gouv.fr, « Que faire en cas de phishing ou hameçonnage ? », fiche réflexe, mise à jour le 07/05/2026. <a href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/fiches-reflexes/hameconnage-phishing" target="_blank" rel="noopener">Lien</a></li>
+    <li>Cybermalveillance.gouv.fr, Rapport d'activité 2025, mars 2026. <a href="https://www.vie-publique.fr/files/rapport/pdf/302708.pdf" target="_blank" rel="noopener">Lien (vie-publique.fr)</a></li>
+    <li>DGCCRF, « SMS et appels indésirables : le 33 700 facilite le signalement des numéros frauduleux », 07/05/2024. <a href="https://www.economie.gouv.fr/dgccrf/sms-et-appels-indesirables-le-33-700-facilite-le-signalement-des-numeros-frauduleux" target="_blank" rel="noopener">Lien</a></li>
+    <li>17Cyber, plateforme d'assistance aux victimes (ministère de l'Intérieur, Cybermalveillance.gouv.fr), lancée en décembre 2024. <a href="https://17cyber.gouv.fr/" target="_blank" rel="noopener">Lien</a></li>
+    <li>Signal Spam et Phishing Initiative, plateformes de signalement recommandées par Cybermalveillance.gouv.fr.</li>
+  </ol>
+</section>
+
+<footer>
+  Projet R5.06 « Cyber réflexes » · BUT 3 Réseaux et Télécommunications · Public : grand public.<br>
+  Équipe : Lucas, Esteban, Thibault, Andrei. Exemples de messages fictifs, aucune donnée réelle utilisée.
+</footer>
+
+</div>
+
+<script>
+// Mise en situation : indices cliquables
+(function(){
+  const flags=document.querySelectorAll('.flag');
+  const count=document.getElementById('count');
+  function update(){
+    let n=0;
+    flags.forEach(f=>{
+      const on=f.getAttribute('aria-pressed')==='true';
+      document.querySelector('.clues li[data-n="'+f.dataset.n+'"]').classList.toggle('on',on);
+      if(on)n++;
+    });
+    count.textContent = n===4 ? "Bravo, vous avez trouvé les 4 indices !" : n+" indice"+(n>1?"s":"")+" trouvé"+(n>1?"s":"")+" sur 4";
+  }
+  flags.forEach(f=>f.addEventListener('click',()=>{f.setAttribute('aria-pressed',f.getAttribute('aria-pressed')==='true'?'false':'true');update();}));
+})();
+
+// Quiz
+(function(){
+  const Q=[
+    {meta:"SMS · de : +33 6 •• •• •• ••",txt:"Votre carte Vitale arrive à expiration. Commandez la nouvelle avant le 31/10 pour garder vos remboursements : vitale-renouvellement-carte.com",scam:true,
+     why:"La carte Vitale n'a pas de date d'expiration, et l'Assurance maladie ne la fait pas renouveler via un lien dans un SMS. Urgence + lien inconnu = arnaque."},
+    {meta:"Notification de votre appli bancaire",txt:"Vous venez de commander en ligne. Votre application bancaire vous demande de valider un paiement de 34,90 € chez le site où vous êtes en train d'acheter.",scam:false,
+     why:"C'est normal : vous êtes à l'origine de l'achat, le montant correspond, et la demande arrive dans l'application officielle. Si vous n'achetiez rien, il faudrait refuser."},
+    {meta:"Mail · de : securite@banque-horizon-alerte.net",txt:"Activité inhabituelle détectée. Votre compte sera suspendu sous 24 h. Cliquez ici pour confirmer votre identifiant et votre mot de passe.",scam:true,
+     why:"Une banque ne demande jamais votre mot de passe par mail. L'adresse de l'expéditeur est douteuse et le message vous met la pression."},
+    {meta:"SMS · de : ServiceClient",txt:"Votre code de connexion est 482 913. Il est valable 5 minutes. Ne le communiquez à personne.",scam:false,
+     why:"Si vous venez de vous connecter à votre compte, ce SMS est normal. Mais attention : si quelqu'un vous appelle pour vous demander ce code, c'est une arnaque. Ne le donnez jamais."},
+    {meta:"Mail · de : remboursement@impots-service-rembourse.fr",txt:"Vous avez droit à un remboursement de 214,50 €. Pour le recevoir, saisissez votre numéro de carte bancaire sur notre formulaire sécurisé.",scam:true,
+     why:"Pour vous rembourser, on n'a pas besoin de votre numéro de carte. Les remboursements officiels se font sur votre compte, depuis votre espace personnel."}
+  ];
+  const box=document.getElementById('quizBox');
+  let i=0,score=0;
+  function render(){
+    if(i>=Q.length){
+      const msg = score===5?"Parfait ! Vous avez les bons réflexes.":score>=3?"Pas mal ! Relisez les conseils ci-dessous pour être imbattable.":"Ces arnaques sont bien faites… Les conseils ci-dessous vont vous aider.";
+      box.innerHTML='<h3>Résultat : '+score+' / 5</h3><p style="margin-top:8px">'+msg+'</p><button class="btn primary next" id="again">Recommencer</button>';
+      document.getElementById('again').onclick=()=>{i=0;score=0;render();};
+      return;
+    }
+    const q=Q[i];
+    box.innerHTML='<div class="qhead"><span>Message '+(i+1)+' / '+Q.length+'</span><span>Score : '+score+'</span></div>'+
+      '<div class="msg"><div class="meta"></div><div class="txt"></div></div>'+
+      '<div class="choices"><button class="btn" data-a="1">Arnaque</button><button class="btn" data-a="0">Message normal</button></div><div id="fb"></div>';
+    box.querySelector('.meta').textContent=q.meta;
+    box.querySelector('.txt').textContent=q.txt;
+    box.querySelectorAll('.choices .btn').forEach(b=>b.onclick=()=>answer(b.dataset.a==='1'));
+  }
+  function answer(saidScam){
+    const q=Q[i],right=saidScam===q.scam;
+    if(right)score++;
+    box.querySelectorAll('.choices .btn').forEach(b=>b.disabled=true);
+    const fb=document.getElementById('fb');
+    fb.innerHTML='<div class="feedback '+(right?'good':'wrong')+'"><strong>'+(right?'Bonne réponse ! ':'Raté. ')+'</strong>'+(q.scam?'C\'était une arnaque. ':'C\'était un message normal. ')+'<span></span></div>'+
+      '<button class="btn primary next">'+(i<Q.length-1?'Message suivant':'Voir mon score')+'</button>';
+    fb.querySelector('.feedback span').textContent=q.why;
+    fb.querySelector('.next').onclick=()=>{i++;render();};
+    fb.querySelector('.next').focus();
+  }
+  render();
+})();
+</script>
+
+</body>
+</html>
